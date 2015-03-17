@@ -30,7 +30,7 @@ s1(Q,Max) :- 	makeTuple(2,3,Max,Tuple),
 				!.
 
 makeTuple(X,Y,Max,[[X,Y,S,P]|T]) :- S is X+Y, S =< Max, !, P is X*Y, Y2 is Y+1, makeTuple(X,Y2,Max,T).
-makeTuple(X,Y,Max,T) :- X2 is X+1, Y2 is X2+1, S is X2+Y2, S=<Max, makeTuple(X2,Y2,Max,T).
+makeTuple(X,_,Max,T) :- X2 is X+1, Y2 is X2+1, S is X2+Y2, S=<Max, makeTuple(X2,Y2,Max,T).
 makeTuple(_,_,_,[]) :- !.
 
 alternates([],[],[]).
@@ -51,7 +51,7 @@ mergeP([Lh|Lt],[Rh|Rt],[Lh|T]) :-	[_,_,_,P1] = Lh,
 									mergeP(Lt,[Rh|Rt],T).
 mergeP([Lh|Lt],[Rh|Rt],[Rh|T]) :- 	[_,_,_,P1] = Lh, 
 									[_,_,_,P2] = Rh, 
-									P1 > P2,  
+									P1 > P2,
 									mergeP([Lh|Lt],Rt,T).
 
 noUniqueProducts([],[],[]).
@@ -80,11 +80,48 @@ mergeS([Lh|Lt],[Rh|Rt],[Rh|T]) :- 	[_,_,S1,_] = Lh,
 
 s2(Q,Max) :- 	makeTuple(2,3,Max,Tuple), 
 				mergeSortP(Tuple,PSorted),
-				noUniqueProducts(PSorted,NoUniques,SumList),
-				mergeSortS(NoUniques,Q),
+				noUniqueProducts(PSorted,NoUniques,Sums),
+				mergeSort(Sums,SumsSorted),
+				noDuplicates(SumsSorted,UniquePSList),
+				mergeSortS(NoUniques,S1),
+				noSumsWUniqueProducts(S1,UniquePSList,NoSumUniques),
+				length(NoSumUniques,S),
+				mergeSortP(NoSumUniques, _),
 				!.
 
-removeDuplicates([],[]).
+dropTwo([A,B|C],C).
+
+mergeSort([],[]).
+mergeSort([X],[X]).
+mergeSort(List,Sorted) :- 	alternates(List,L,R), 
+							mergeSort(L, SortedL), 
+							mergeSort(R, SortedR), 
+							merge(SortedL,SortedR,Sorted).
+merge([],R,R).
+merge(L,[],L).
+merge([Lh|Lt],[Rh|Rt],[Lh|T]) :-	Lh =< Rh, 
+									merge(Lt,[Rh|Rt],T).
+merge([Lh|Lt],[Rh|Rt],[Rh|T]) :- 	Lh > Rh,  
+									merge([Lh|Lt],Rt,T).
+
+app([],List,List).
+app([Head|Tail],List,[Head|NewTail]):- append(Tail,List,NewTail).
+
+noDuplicates([],[]).
+noDuplicates([X],[X]).
+noDuplicates([H,H|T],Unique) :- noDuplicates([H|T], Unique).
+noDuplicates([H|T],Unique) :- noDuplicates(T,NewTail), app([H],NewTail,Unique).
+
+isMember(X, [X|_]).                           
+isMember(X, [_|Tail]) :- isMember(X, Tail).
+
+%% noSumsWUniqueProducts([],_,[]) :- !.
+%% noSumsWUniqueProducts([[_,_,S,_]|T], Sums, Result) :-	isMember(S, Sums), !,
+%% 														noSumsWUniqueProducts(T, Sums, Result).
+%% noSumsWUniqueProducts([Tuple|T], Sums, [Tuple|Result]) :- noSumsWUniqueProducts(T, Sums, Result).
+noSumsWUniqueProducts(List,Sums,List) :- write(List), write(Sums).
+
+
 
 
 /*
