@@ -21,6 +21,40 @@ I have <or I have not, choose which is appropriate> used built-ins.
 5. <Number of elements in the list binding Q after executing s4(Q,500)>
 s4(Q,500) uses <number> inferences. */
 
+%--- S1 -----------------------------------------------
+
+%% s1(Q,Max) :- makeTuple(2,3,Max,Q).
+s1(Q,Max) :- makeTuple(2,3,Max,Tuple), 
+				mergeSortP(Tuple,Q),!.
+
+makeTuple(X,Y,Max,[[X,Y,S,P]|T]) :- S is X+Y, S =< Max, !, P is X*Y, Y2 is Y+1, makeTuple(X,Y2,Max,T).
+makeTuple(X,Y,Max,T) :- X2 is X+1, Y2 is X2+1, S is X2+Y2, S=<Max, makeTuple(X2,Y2,Max,T).
+makeTuple(_,_,_,[]) :- !.
+
+alternates([],[],[]).
+alternates([X],[X],[]).
+alternates([Lh,Rh|T],[Lh|Lt],[Rh|Rt]) :- alternates(T,Lt,Rt).
+ 
+mergeSortP([],[]).
+mergeSortP([X],[X]).
+mergeSortP(List,Sorted) :- 	alternates(List,L,R), 
+							mergeSortP(L, SortedL), 
+							mergeSortP(R, SortedR), 
+							mergeP(SortedL,SortedR,Sorted).
+mergeP([],R,R).
+mergeP(L,[],L).
+mergeP([Lh|Lt],[Rh|Rt],[Lh|T]) :-	[_,_,_,P1] = Lh, 
+									[_,_,_,P2] = Rh, 
+									P1 =< P2, 
+									mergeP(Lt,[Rh|Rt],T).
+mergeP([Lh|Lt],[Rh|Rt],[Rh|T]) :- 	[_,_,_,P1] = Lh, 
+									[_,_,_,P2] = Rh, 
+									P1 > P2,  
+									mergeP([Lh|Lt],Rt,T).
+
+
+
+%------------------------------------------------------
 
 
 
