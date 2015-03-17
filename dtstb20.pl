@@ -24,8 +24,9 @@ s4(Q,500) uses <number> inferences. */
 %--- S1 -----------------------------------------------
 
 %% s1(Q,Max) :- makeTuple(2,3,Max,Q).
-s1(Q,Max) :- makeTuple(2,3,Max,Tuple), 
-				mergeSortP(Tuple,Q),!.
+s1(Q,Max) :- 	makeTuple(2,3,Max,Tuple), 
+				mergeSortP(Tuple,PSorted),
+				noUniqueProducts(PSorted,Q),!.
 
 makeTuple(X,Y,Max,[[X,Y,S,P]|T]) :- S is X+Y, S =< Max, !, P is X*Y, Y2 is Y+1, makeTuple(X,Y2,Max,T).
 makeTuple(X,Y,Max,T) :- X2 is X+1, Y2 is X2+1, S is X2+Y2, S=<Max, makeTuple(X2,Y2,Max,T).
@@ -52,6 +53,10 @@ mergeP([Lh|Lt],[Rh|Rt],[Rh|T]) :- 	[_,_,_,P1] = Lh,
 									P1 > P2,  
 									mergeP([Lh|Lt],Rt,T).
 
+noUniqueProducts([],[]).
+noUniqueProducts([[_,_,_,P],[X2,Y2,S2,P],[X3,Y3,S3,P]|T],[[X3,Y3,S3,P]|L]) :- noUniqueProducts([[X2,Y2,S2,P],[X3,Y3,S3,P]|T],L).
+noUniqueProducts([[X1,Y1,S1,P],[X2,Y2,S2,P]|T],[[X1,Y1,S1,P],[X2,Y2,S2,P]|L]) :- noUniqueProducts(T,L).
+noUniqueProducts([_|T],Result) :- noUniqueProducts(T,Result).
 
 
 %------------------------------------------------------
