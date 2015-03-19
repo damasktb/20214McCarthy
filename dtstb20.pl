@@ -1,4 +1,4 @@
-/* dtstb20 Damask Talary-Brown
+/* <dtstb20> <Damask Talary-Brown>
 
 THIS WORK IS ENTIRELY MY OWN.
 
