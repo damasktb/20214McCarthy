@@ -1,6 +1,6 @@
-/* This Prolog program marks CM20214/221A 2013/14 CW2 as specified in <http://www.cs.bath.ac.uk/ag/CM20214-20221A/CM20214-21A-CW2-2014.pdf>
+/* This Prolog program marks CM20214/221A 2014/15 CW2 as specified in <http://www.cs.bath.ac.uk/ag/CM20214-20221A/CM20214-21A-CW2-2015.pdf>
 
-v0.999 Alessio Guglielmi (University of Bath) 26 March 2014
+v1.0 Alessio Guglielmi (University of Bath) 5 February 2015
 
 Instructions:
 
@@ -12,8 +12,6 @@ Instructions:
    ?- mark('abc12.pl').
 
 The result should be the grade for your solution and an explanation.
-
-In case built-ins are used a manual inspection of the program by the instructor is needed and some marks will be detracted in accordance with the coursework specification.
 
 If Prolog loops or crashes, the most likely cause is the presence of an infinite number of answers. In that case a manual grading will be performed and marks will be subtracted as specified in the coursework specification.
 
@@ -31,15 +29,16 @@ This is an example run on a correct program with a good but not spectacular effi
    Task 2 is solved correctly and with no multiple answers.
    Task 3 is solved correctly and with no multiple answers.
    Task 4 is solved correctly and with no multiple answers.
-   Task 4 requires 2078712 inferences.
+   Task 4 requires 359701 inferences.
    Task 5 is solved correctly and with no multiple answers.
-   Task 5 requires 52680747 inferences.
-   The grades for tasks 1 to 5 are: 20 + 20 + 20 + 13 + 6 = 79.
+   Task 5 requires 78818869 inferences.
+   The grades for tasks 1 to 5 are: 20 + 20 + 20 + 7 + 5 = 72.
+   *** Found built-in not(.
+   Because of built-ins the grade is 72 - 20 = 52.
    The penalty for multiple answers is 0.
-   No built-ins found.
-   The coursework grade will most likely be 79.
-   The marker will inspect the program for soundness and fairness.
-   -id:abc12.pl-t4:2078712-t5:52680747-BI:0-MG:79-
+   The final grade is therefore 52.
+   The marker will inspect the program for soundness and fairness and might    change the grade.
+   -id:abc12.pl-t4:359701-t5:78818869-BI:1-MG:52-
    true.
 
 Please note that I reserve the right to add other built-ins to the list contained in this program. In fact, the specification tells you exactly what you can use, all the rest you can't! There simply are too many possibilities for me to list them all in this program.
@@ -76,29 +75,51 @@ mark(X) :- consult(X),
                                                M4,' + ',
                                                M5,' = ',
                                                M ,'.\n']),
-           penalty(Mul1,Mul2,Mul3,Mul4,Mul5,Pen),
-           mywrite(['The penalty for multiple answers is ',Pen,'.\n']),
            readfiletocodes(X,XC),
            string_codes(XC,XS),
            built-ins(BL),
            find_built_ins(BL,XS,F),
-           Grade is M - Pen,
-           final_mark(Grade,F),
+           grade_after_built_ins(M,F,Grade),
+           penalty(Mul1,Mul2,Mul3,Mul4,Mul5,Grade,Pen),
+           mywrite(['The penalty for multiple answers is ',Pen,'.\n']),
+           Final is Grade - Pen,
+           mywrite(['The final grade is therefore ',Final,'.\n']),
            mywrite([
-           'The marker will inspect the program for soundness and fairness.\n',
+           'The marker will inspect the program for soundness and fairness '
+           ,'and might change the grade.\n',
            '-id:',X,'-t4:',I4,'-t5:',I5,'-BI:',F,'-MG:',Grade,'-']).
 
 f(X,Y) :- Y is min(18,(12500/X^0.45)).
 
-built-ins(['assert(',
+built-ins(['abolish(',
+           'apply(',
+           'assert(',
+           'asserta(',
+           'assertz(',
            'bagof(',
+           'call_cleanup(',
+           'call_with_depth_limit(',
+           'call_with_inference_limit(',
            'call(',
+           'copy_predicate_clauses(',
+           'erase(',
            'findall(',
+           'findnsols(',
+           'flag(',
            'forall(',
+           'ignore(',
+           'instance(',
            'not(',
+           'once(',
+           'recorda(',
+           'recorded(',
+           'recordz(',
+           'redefine_system_predicate(',
            'retract(',
            'retractall(',
            'setof(',
+           'setup_call_catcher_cleanup(',
+           'setup_call_cleanup(',
            '\\+']).
 
 find_built_ins([   ], _,0) :- !.
@@ -108,6 +129,11 @@ find_built_ins([B|R],XS,F) :- sub_string(exact,B,XS),
                               find_built_ins(R,XS,G),
                               F is G + 1.
 find_built_ins([_|R],XS,F) :- find_built_ins(R,XS,F).
+
+grade_after_built_ins(M,0,M    ) :- !, 
+                                    mywrite(['No built-ins found.\n']).
+grade_after_built_ins(M,_,Grade) :- Grade is max(0,M - 20),
+       mywrite(['Because of built-ins the grade is ',M,' - 20 = ',Grade,'.\n']).
 
 load(X) :- retract(count(_)), !,
            assert(fact(X)),
@@ -230,17 +256,17 @@ marks4([[Q           ]  ],I,M4,0) :-  nonvar(Q), Q = [4,13,17,52], !,
            'Task 4 is solved correctly and with no multiple answers.\n',
            'Task 4 requires ',I,' inferences.\n'
            ]),
-           AI is I * 68,
+           AI is I * 100,
            f(AI,MP4),
-           M4 is ceiling(MP4/2 + 11).
+           M4 is ceiling(MP4 + 2).
 marks4([[Q           ]|_],I,M4,1) :-  nonvar(Q), Q = [4,13,17,52], !,
            mywrite([
            'Task 4 is solved correctly but there are multiple answers.\n',
            'Task 4 requires ',I,' inferences.\n'
            ]),
-           AI is I * 68,
+           AI is I * 100,
            f(AI,MP4),
-           M4 is ceiling(MP4/2 + 11).
+           M4 is ceiling(MP4 + 2).
 marks4([               _],_, 0,0) :- !,
            mywrite([
            'Task 4 is not solved correctly but there are no multiple answers.\n'
@@ -281,17 +307,6 @@ marks5([             _|_],_, 0,1) :-
            'Task 5 is not solved correctly and there are multiple answers.\n'
            ]).
 
-final_mark(Grade,0)  :-        !,
-                        mywrite([
-                        'No built-ins found.\n',
-                        'The coursework grade will most likely be ',Grade,'.\n'
-                        ]).
-final_mark(Grade,N)  :- N > 0, !,
-                        mywrite([
-                        'The coursework grade will be at most ',Grade,
-                 '; marks will be manually deducted for the use of built-ins.\n'
-                        ]).
-
 mywriteaux(_ ,[])    :- !.
 mywriteaux(IX,[H|T]) :- write(IX,H), 
                         write(   H), 
@@ -301,8 +316,8 @@ mywrite(L) :- fileid(X), open(X,append,IX),
               mywriteaux(IX,L),
               close(IX).
 
-penalty(0,0,0,0,0, 0) :- !.
-penalty(_,_,_,_,_,20).
+penalty(0,0,0,0,0,_    ,0  ) :- !.
+penalty(_,_,_,_,_,Grade,Pen) :- Pen is floor(Grade * 0.3).
 
 /* The following procedure finds the first two answers of the five predicates */
 
